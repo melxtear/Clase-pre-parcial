@@ -7,6 +7,21 @@
 
 using namespace std;
 
+typedef struct Pacientes {
+
+	unsigned int dni;
+	string nombre;
+	string apellido;
+	char sexo;
+	unsigned int natalicio;
+	bool estado;
+	unsigned int id_os;
+	//Contactos contacto;//tendria que tener 2? uno de emergencia y otra dle mismo paciente
+	//Consultas consulta;//consulta asociada, lee la del paciente
+	//ObraSocial obra_social;
+
+} Pacientes;
+
 typedef struct nota {
 	float nota1;
 	float nota2;
@@ -20,14 +35,14 @@ typedef struct alumno {
 }alu;
 
 void agregar(alu*& lista_alu, alu alumno, int* tamactual) {
-	*tamactual = *tamactual + 1;
+	*tamactual = *tamactual + 1; 
 	int i = 0;
-	alu* aux = new alu[*tamactual];
+	alu* aux = new alu[*tamactual];//vector de alumnos con tamaño actual+1
 	while (i < *tamactual - 1 && *tamactual - 1 != 0) {
 		aux[i] = lista_alu[i];
 		i++;
 	}
-	aux[i] = alumno;
+	aux[i] = alumno; //
 
 	delete[] lista_alu;
 	lista_alu = aux;
@@ -52,7 +67,7 @@ void resize(alu*& lista_alu, int* tamactual, int cantidad_aumentar) {
 void agregar_alumno(alu alumno, string a1) {
 	fstream archi;
 
-	archi.open(a1, ios::app); //
+	archi.open(a1, ios::app); //en vez de app, puede ir out para crear o in para leer archivo
 
 	if (archi.is_open()) {
 		archi << alumno.dni << " ," << alumno.apellido << ", " << alumno.nombre << endl;
@@ -85,10 +100,52 @@ void eliminar_alumno(alu*& lista_alu, int alumno_a_eliminar_pos, string a1, int 
 	lista_alu = aux;
 	archi.close();
 }
+Pacientes* leer_archivos_pacientes(string a1) {
+
+	Pacientes* l_pac = new Pacientes[200];
+	Pacientes aux;
+	/*Contactos aux2;
+	Medicos aux3;
+	ObraSocial aux4;
+	Consulta aux5;*/
+
+	string dummy;
+	char coma;
+	unsigned int dniaux;
+	unsigned int matricula_aux;
+	unsigned int id_obra_social_aux;
+	int tamact = 0;
+
+	fstream fp;
+	fp.open(a1, ios::in);
+	/*fp2.open(a2, ios::in);
+	fp3.open(a3, ios::in);
+	fp4.open(a4, ios::in);
+	fp5.open(a5, ios::in);*/
+
+
+	if (!(fp.is_open()))
+		return nullptr;
+
+	fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy;//pacientes
+
+	while (fp) { //lee archivo de pacientes 
+		fp >> aux.dni >> coma >> aux.apellido >> coma >> aux.nombre >> aux.sexo >> coma >> aux.natalicio >> coma >> aux.estado >> coma >> aux.id_os;
+		cout << "Lei paciente: " << aux.nombre << endl;
+	}
+
+	//agregar(l_pac, aux, &tamact);
+
+
+	fp.close();
+
+
+	return l_pac;
+}
 
 alu* leer_archivos(string a1, string a2) {
 	alu* l_alumnos = new alu[0];
-	alu aux;
+	Pacientes aux;
 	nota naux;
 	string dummy;
 	char coma;
@@ -97,15 +154,20 @@ alu* leer_archivos(string a1, string a2) {
 
 	fstream fp, fp2;
 	fp.open(a1, ios::in);
-	fp2.open(a2, ios::in);
+	//fp2.open(a2, ios::in);
 
-	if (!(fp.is_open() && fp2.is_open()))
+	if (!(fp.is_open()))
 		return nullptr;
 
-	fp >> dummy >> coma >> dummy >> coma >> dummy;
-	fp2 >> dummy >> coma >> dummy >> coma >> dummy;
-
-	while (fp) {
+	//fp >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy >> coma >> dummy;//pacientes
+	//cout << dummy;
+	//fp >> dummy >> coma >> dummy >> coma >> dummy;
+	//fp2 >> dummy >> coma >> dummy >> coma >> dummy;
+	while (fp) { //lee archivo de pacientes 
+		fp >> aux.dni >> coma >> aux.apellido >> coma >> aux.nombre >> aux.sexo >> coma >> aux.natalicio >> coma >> aux.estado >> coma >> aux.id_os;
+		cout << "Lei paciente: " << aux.nombre << endl;
+	}
+	/*while (fp) {
 		fp >> aux.dni >> coma >> aux.apellido >> coma >> aux.nombre;
 		while (fp2) {
 			fp2 >> dniaux >> coma >> naux.nota1 >> coma >> naux.nota2;
@@ -113,17 +175,17 @@ alu* leer_archivos(string a1, string a2) {
 				aux.n = naux;
 				break;
 			}
-		}
-		fp2.seekg(fp2.beg); //setea posicion
+		}*/
+		 //setea posicion 0 1, vuelve a la pos 0
 
 		// Volvemos a salter el encabezado de fp2, porque posicionamos el cursor de lectura al inicio del archivo.
-		fp2 >> dummy >> coma >> dummy >> coma >> dummy;
+		//fp2 >> dummy >> coma >> dummy >> coma >> dummy;
 
-		agregar(l_alumnos, aux, &tamact);
-	}
+		//agregar(l_alumnos, aux, &tamact);
+	
 
 	fp.close();
-	fp2.close();
+	//fp2.close();
 
 	return l_alumnos;
 }
@@ -152,7 +214,10 @@ void crear_archivo(string nombre_a1, string nombre_a2) {
 }
 
 int main() {
-	alu* lista; 
+	alu* lista;
+	lista = leer_archivos("alumnos.csv", "");
+
+	/*alu* lista;
 
 	alu* lista2;
 	lista2 = new alu[3];
@@ -193,8 +258,10 @@ int main() {
 	int pos_a_eliminar = buscar_alumno(lista, lista[1], size);
 	eliminar_alumno(lista, pos_a_eliminar, "alumnos.csv", size);
 	delete[] lista;
-
+	*/
 	return 0;
+
+
 }
 
 
